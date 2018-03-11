@@ -47,6 +47,7 @@ def BTclient(threading.Thread):
 		while self.running:
 			if self.search_for_devices and not self.BTsearcher.is_searching():
 				self.search()
+            
 			
 		
 	def stop(self):
