@@ -56,12 +56,16 @@ class BTclient(threading.Thread):
     def connect(self, target_address, target_port,
                 target_protocol=bluetooth.RFCOMM):
         self.target_address = target_address
-
+        self.target_port = target_port
+        self.target_protocol = target_protocol
         self.socket = bluetooth.BluetoothSocket(target_protocol)
 
-    def search(self, state=True):
+    def search(self):
+        self.search_for_devices = True
         self.BTsearcher.find_devices(lookup_names=True)
 
+    def stop_search(self):
+        self.search_for_devices = False
     def get_uuid(self):
         return self.uuid
 
@@ -69,4 +73,4 @@ class BTclient(threading.Thread):
         self.uuid = uuid
 
     def get_devices(self):
-        return self.BTclient.get_devices()
+        return self.BTsearcher.get_devices()
