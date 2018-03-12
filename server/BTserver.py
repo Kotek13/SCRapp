@@ -35,7 +35,7 @@ class BTserver(threading.Thread):
     def get_uuid(self):
         return self.uuid
 
-    def set_uuid(self,uuid = str(uuid4())):
+    def set_uuid(self,uuid = "00000000-0000-0000-0000-000000000000"):
         self.uuid = uuid
 
     def send_data(self,data):

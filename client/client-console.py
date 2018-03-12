@@ -1,38 +1,63 @@
 from BTclient import BTclient
 from time import sleep
-
+from tabulate import tabulate
 client = BTclient()
 
 client.daemon = True
 client.set_uuid("5d6101f4-3c07-4c0e-b9c2-39e1df5690cc")
 client.start()
 scan = True
+target = None
 while scan:
     client.search()
     for i in reversed(range(1,30)):
         print i
         sleep(1)
     client.stop_search()
-    devices = client.get_devices()
-    if len(devices) == 0:
+    services = client.get_services()
+    if len(services) == 0:
         print "None devices found"
+
     else:
-        address = devices.keys()
-        print "Found",len(devices),"devices:"
-        for i in range(0,len(address)):
-            print i, ".\t", address[i], devices[address[i]]
+        print "Found",len(services),"devices:"
+        table = []
+        for i in range(0,len(services)):
+            table.append([i+1,
+                          services[i]["host"],
+                          services[i]["name"],
+                          services[i]["port"],
+                          services[i]["service-id"],
+                          services[i]["protocol"]])
+        print tabulate(table,headers=["No.","Address","Name","Port","UUID","Protocol"])
+
     print "select device to connect or -1 to rescan"
     while True:
-        selection = int(input("Selection:"))
-        if selection == -1:
+        selection = input("Selection:")
+        if selection == "q":
+            client.stop()
+            client.join()
+            exit(0)
+        elif int(selection) == -1:
             break;
-        elif 0<=selection and selection<len(devices):
+        elif 1<=int(selection) and int(selection)<=len(services):
             scan = False
-            target =
+            target = services[selection-1]
+            break
 
+if target is None:
+    print "unspecified target"
+    exit(0)
+client.connect(target["host"],int(target["port"]),target["protocol"])
 
-
+try:
+    while True:
+        data = client.get_data()
+        if data is not None:
+            print data
+except KeyboardInterrupt:
+    print "Keyboard interruption"
 
 client.stop()
 client.join()
 print "client stopped"
+
