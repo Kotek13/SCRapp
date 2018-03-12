@@ -1,32 +1,50 @@
 import bluetooth
 import threading
 from uuid import uuid4
+from time import sleep
 
 
-class BTsearcher(bluetooth.DeviceDiscoverer):
+class BTsearcher(threading.Thread):
     def __init__(self):
-        bluetooth.DeviceDiscoverer.__init__(self)
+        threading.Thread.__init__(self)
         self.devices = {}
         self.searching = False
+        self.running = False
 
-    def pre_inquiry(self):
+    def run(self):
+        self.running = True
+        while self.running:
+            if self.searching:
+                devices = bluetooth.discover_devices(duration=5,lookup_names=True)
+                for device in devices:
+                    address = device[0]
+                    name = device[1]
+                    if not self.devices.has_key(address):
+                        self.devices[address] = name
+            else:
+                sleep(0.2)
+
+        self.running = False
+        self.searching = False
+
+    def enable_searching(self):
         self.searching = True
 
-        def device_discovered(self, address, device_class, rssi, name):
-            if not self.devices.has_key(address):
-                self.devices[address] = (name, rssi, device_class)
+    def disable_serching(self):
+        self.searching = False
 
-        def inquiry_complete(self):
-            self.searching = False
+    def stop(self):
+        self.searching = False
+        self.running = False
 
-        def get_devices(self):
-            return self.devices
+    def get_devices(self):
+        return self.devices
 
-        def get_device(self, address):
-            return self.devices[address]
+    def get_device(self, address):
+        return self.devices[address]
 
-        def is_searching(self):
-            return self.searching
+    def is_searching(self):
+        return self.searching
 
 
 class BTclient(threading.Thread):
@@ -61,11 +79,13 @@ class BTclient(threading.Thread):
         self.socket = bluetooth.BluetoothSocket(target_protocol)
 
     def search(self):
+        print "search started"
         self.search_for_devices = True
         self.BTsearcher.find_devices(lookup_names=True)
 
     def stop_search(self):
         self.search_for_devices = False
+
     def get_uuid(self):
         return self.uuid
 
