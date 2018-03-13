@@ -11,9 +11,9 @@ try:
     print "server started"
     server.start()
     while server.isAlive():
-        print "server alive"
+        #print "server alive"
         while server.connected():
-            print "sending data"
+            #print "sending data"
             server.send_data(str(random()))
         sleep(0.1)
     print "server thread died"

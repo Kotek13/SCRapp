@@ -1,6 +1,7 @@
 import bluetooth
 import threading
 from uuid import uuid4
+from time import sleep
 
 
 class BTserver(threading.Thread):
@@ -19,7 +20,11 @@ class BTserver(threading.Thread):
         self.advertise_service()
         self.running = True
         while self.running:
-            self.target_socket, self.target_address = self.socket.accept()
+            if not self.connected():
+                self.target_socket, self.target_address = self.socket.accept()
+            else:
+                sleep(1)
+
 
     def stop(self):
         self.running = False
@@ -41,16 +46,16 @@ class BTserver(threading.Thread):
     def send_data(self,data):
         print "sending data:",data
         try:
-            self.socket.send(data)
+            self.target_socket.send(data)
         except bluetooth.BluetoothError:
             print "bluetooth error while sending"
             #pass
 
     def connected(self):
-        if self.socket is None:
+        if self.target_socket is None:
             return False
         try:
-            self.socket.getpeername()
+            self.target_socket.getpeername()
             return True
         except bluetooth.BluetoothError:
             return False
