@@ -39,10 +39,12 @@ class BTserver(threading.Thread):
         self.uuid = uuid
 
     def send_data(self,data):
+        print "sending data:",data
         try:
             self.socket.send(data)
         except bluetooth.BluetoothError:
-            pass
+            print "bluetooth error while sending"
+            #pass
 
     def connected(self):
         if self.socket is None:
