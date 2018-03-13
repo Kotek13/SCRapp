@@ -1,6 +1,8 @@
 from BTclient import BTclient
 from time import sleep
 from tabulate import tabulate
+import bluetooth
+
 client = BTclient()
 
 client.daemon = True
@@ -47,13 +49,17 @@ while scan:
 if target is None:
     print "unspecified target"
     exit(0)
-client.connect(target["host"],int(target["port"]),target["protocol"])
+if target["protocol"] == "RFCOMM":
+    client.connect(target["host"],int(target["port"]),bluetooth.RFCOMM)
+elif target["protocol"] == "L2CAP":
+    client.connect(target["host"],int(target["port"]),bluetooth.L2CAP2)
 
 try:
     while True:
         data = client.get_data()
         if data is not None:
             print data
+        print "buff empty"
 except KeyboardInterrupt:
     print "Keyboard interruption"
 

@@ -67,11 +67,12 @@ class BTreciever(threading.Thread):
 
     def connect(self, target_address, target_port,
                 target_protocol):
+        print "connecting",target_address,target_port,target_protocol
         self.target_address = target_address
         self.target_port = target_port
         self.target_protocol = target_protocol
         self.socket = bluetooth.BluetoothSocket(target_protocol)
-        self.socket.connect((self.target_address,self.target_port))
+        self.socket.connect((self.target_address,int(self.target_port)))
         self.socket.settimeout(5)
 
     def is_running(self):

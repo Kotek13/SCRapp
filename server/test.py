@@ -1,5 +1,6 @@
 from BTserver import BTserver
 from random import random
+from time import sleep
 
 server = BTserver();
 server.daemon = True
@@ -10,8 +11,11 @@ try:
     print "server started"
     server.start()
     while server.isAlive():
+        print "server alive"
         while server.connected():
+            print "sending data"
             server.send_data(str(random()))
+        sleep(0.1)
     print "server thread died"
 except KeyboardInterrupt:
     print "keyboard interruption"
