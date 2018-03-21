@@ -33,6 +33,7 @@ class BtServer(Thread):
         uuid = "5d6101f4-3c07-4c0e-b9c2-39e1df5690cc"
         bluetooth.advertise_service(self.server_sock, self.name, uuid)
         self.client_sock, address = self.server_sock.accept()
+        self.client_sock.settimeout(10)
         self.state = self.State.connected
         print "Accepted connection from ", address
         while 0 < self.state < self.State.stopping:
@@ -54,7 +55,8 @@ class BtServer(Thread):
         if not self.is_connected():
             return False
         try:
-            self.client_sock.send(data)
+            packet = '['+data+']'
+            self.client_sock.sendall(packet)
             return True
         except bluetooth.BluetoothError:
             return False
@@ -77,12 +79,18 @@ if __name__ == "__main__":
     server.daemon = True
     server.start()
     try:
-        while server.isAlive():
-            # if server.client_sock is None or server.server_sock is None:
-            if not server.is_connected():
-                sleep(0.1)
+        while True:
+            if server.isAlive():
+                if not server.is_connected():
+                    sleep(0.1)
+                else:
+                    server.send_data(str(random()))
             else:
-                server.send_data('"'+str(random())+'"')
+                server = BtServer()
+                server.daemon = True
+                server.start()
+
     except KeyboardInterrupt:
         pass
+    if server is not None and se
     server.stop()
