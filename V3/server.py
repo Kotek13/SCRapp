@@ -8,9 +8,10 @@ class BtServer(Thread):
 
     class State:
         stop = 0
-        listening = 1
-        connected = 2
-        stopping = 3
+        starting = 1
+        listening = 2
+        connected = 3
+        stopping = 4
 
     def __init__(self):
         Thread.__init__(self)
@@ -26,6 +27,7 @@ class BtServer(Thread):
         self.state = self.State.stop
 
     def run(self):
+        self.state = self.State.starting
         self.server_sock.bind(("", self.port))
         self.state = self.State.listening
         self.server_sock.listen(1)
@@ -33,7 +35,7 @@ class BtServer(Thread):
         uuid = "5d6101f4-3c07-4c0e-b9c2-39e1df5690cc"
         bluetooth.advertise_service(self.server_sock, self.name, uuid)
         self.client_sock, address = self.server_sock.accept()
-        self.client_sock.settimeout(10)
+        #self.client_sock.settimeout(10)
         self.state = self.State.connected
         print "Accepted connection from ", address
         while 0 < self.state < self.State.stopping:
@@ -42,6 +44,7 @@ class BtServer(Thread):
                 if success:
                     self.buff.pop()
         self.state = self.State.stop
+        print "Connection lost"
 
     def stop(self):
         self.state = self.State.stopping
@@ -78,19 +81,30 @@ if __name__ == "__main__":
     server = BtServer()
     server.daemon = True
     server.start()
+    sleep(0.1)
     try:
         while True:
-            if server.isAlive():
+            #print "Loop"
+            if server.State.stop < server.state:
                 if not server.is_connected():
                     sleep(0.1)
                 else:
-                    server.send_data(str(random()))
+                    data = str(random())
+                    print server.state,data
+                    completed = server.send_data(data)
+                    if not completed:
+                        server.stop()
             else:
+                print "Restarting"
+                del server
                 server = BtServer()
                 server.daemon = True
                 server.start()
+                sleep(0.1)
 
     except KeyboardInterrupt:
         pass
     if server is not None:
-    server.stop()
+        server.stop()
+        server.join()
+    print "Server stopped"

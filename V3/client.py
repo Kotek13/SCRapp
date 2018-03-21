@@ -20,10 +20,10 @@ class BtClient(Thread):
         self.buff = ""
         self.host_port = None
         self.host_name = None
-        self.host_addr = None
-        self.host_prot = None
+        self.host_address = None
+        self.host_protocol = None
         self.sock = None
-        self.buff_max_size = 1024*50
+        self.buff_max_size = 1024*10
         self.packets = []
         self.tmp_packet = ""
 
@@ -37,18 +37,19 @@ class BtClient(Thread):
         first_match = service_matches[0]
         self.host_port = first_match["port"]
         self.host_name = first_match["name"]
-        self.host_addr = first_match["host"]
-        self.host_prot = first_match["protocol"]
+        self.host_address = first_match["host"]
+        self.host_protocol = first_match["protocol"]
         self.state = self.State.connecting
-        print "connecting to \"%s\" on %s" % (self.host_name, self.host_addr)
+        print "connecting to \"%s\" on %s" % (self.host_name, self.host_address)
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        self.sock.connect((self.host_addr, self.host_port))
+        self.sock.connect((self.host_address, self.host_port))
         self.state = self.State.connected
         try:
             while 0 < self.state < self.State.stopping\
                     and len(self.buff) <= self.buff_max_size:
                 _data = self.sock.recv(1024)
                 self.buff += _data
+                self.packet_creator()
         except bluetooth.BluetoothError:
             pass
         self.stop()
@@ -62,19 +63,15 @@ class BtClient(Thread):
         self.state = self.State.stop
 
     def packet_creator(self):
-        while 0 < self.state < self.State.stopping:
-            if len(self.buff) > 0:
-                start = self.buff.find('[')
-                end = self.buff.find(']')
-                if start == -1 or end == -1:
-                    sleep(0.1)
-                elif end<start:
-                    self.packets.append(self.buff[:end-1])
-                    self.buff = self.buff[end+1:]
-                else:
-                    self.packets.append(self.buff[start+1:end-1])
+        start = self.buff.find('[')
+        end = self.buff.find(']')
+        while len(self.buff) > 0 and start != -1 and end != -1:
+            if end<start:
+                self.packets.append(self.buff[:end-1])
+                self.buff = self.buff[end+1:]
             else:
-                sleep(0.1)
+                self.packets.append(self.buff[start+1:end-1])
+                self.buff = self.buff[end + 1:]
 
     def get_data(self):
         if len(self.packets) == 0:

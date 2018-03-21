@@ -2,6 +2,7 @@ import appJar
 from client import BtClient
 from threading import Thread
 from time import sleep
+from decimal import Decimal
 
 class BtClientApp():
     def __init__(self):
@@ -13,16 +14,16 @@ class BtClientApp():
         self.gui.thread(self.update_data)
 
     def init_gui(self):
-        self.gui.startLabelFrame("Connection",0,0)
+        self.gui.startLabelFrame("Connection", 0, 0)
 
         self.gui.addLabel("Status", "Status:disconnected")
 
         self.gui.addButtons(["connection_button", "Default UUID"], [self.connection_button, self.default_uuid])
-        self.gui.setButton("connection_button","Connect")
+        self.gui.setButton("connection_button", "Connect")
 
         self.gui.addEntry("UUID")
         self.gui.setEntry("UUID", self.client.uuid)
-        self.gui.setEntryWidth("UUID",33)
+        self.gui.setEntryWidth("UUID", 33)
 
         self.gui.addLabel("Address", "Address:")
         self.gui.addLabel("Protocol", "Protocol:")
@@ -30,8 +31,13 @@ class BtClientApp():
 
         self.gui.stopLabelFrame()
 
-        self.gui.startLabelFrame("Data",0,1)
-        self.gui.addScrolledTextArea("Data")
+        self.gui.startLabelFrame("Data", 0, 1)
+        self.gui.addLabel("buffer_size","Buffer size:"+str(len(self.client.buff)))
+        self.gui.addLabel("buffer",self.client.buff)
+        self.gui.addLabel("packets", "Packets waiting:"+str(len(self.client.packets)))
+        self.gui.addLabel("data_label", "Data:")
+        #self.gui.addMeter("data_meter")
+        self.gui.setStretch("row")
         self.gui.stopLabelFrame()
 
     def start_app(self):
@@ -56,7 +62,7 @@ class BtClientApp():
             self.connected = True
 
     def default_uuid(self):
-        self.gui.setEntry("UUID","5d6101f4-3c07-4c0e-b9c2-39e1df5690cc")
+        self.gui.setEntry("UUID", "5d6101f4-3c07-4c0e-b9c2-39e1df5690cc")
 
     def update_status(self):
         while True:
@@ -71,13 +77,13 @@ class BtClientApp():
             elif self.client.state == self.client.State.stopping:
                 self.gui.setLabel("Status", "Status:stopping")
 
-            if self.client.host_addr is not None:
-                self.gui.setLabel("Address", "Address:" + self.client.host_addr)
+            if self.client.host_address is not None:
+                self.gui.setLabel("Address", "Address:" + self.client.host_address)
             else:
                 self.gui.setLabel("Address", "Address:")
 
-            if self.client.host_prot is not None:
-                self.gui.setLabel("Protocol", "Protocol:" + self.client.host_prot)
+            if self.client.host_protocol is not None:
+                self.gui.setLabel("Protocol", "Protocol:" + self.client.host_protocol)
             else:
                 self.gui.setLabel("Protocol", "Protocol:")
 
@@ -90,14 +96,20 @@ class BtClientApp():
 
     def update_data(self):
         while True:
-            print "buff:",len(self.client.buff)
+            # print "buff:",len(self.client.buff)
             data = self.client.get_data()
+            self.gui.setLabel("buffer_size", "Buffer size:" + str(len(self.client.buff)))
+            self.gui.setLabel("buffer", self.client.buff)
+            self.gui.setLabel("packets", "Packets waiting:" + str(len(self.client.packets)))
             if data is not None:
-                self.gui.setTextArea("Data", self.gui.getTextArea("Data")+"\n"+data)
+                self.gui.setLabel("data_label", "Data:"+data)
+                #self.gui.setMeter("data_meter", round(Decimal(data)*100), data)
+            else:
+                sleep(0.1)
 
 
 if __name__ == "__main__":
     print "GUI started"
     app = BtClientApp()
     app.start_app()
-    print "Add ended"
+    print "App ended"
