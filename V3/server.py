@@ -92,5 +92,5 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         pass
-    if server is not None and se
+    if server is not None:
     server.stop()
