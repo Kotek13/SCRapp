@@ -3,18 +3,21 @@ from client import BtClient
 from threading import Thread
 from time import sleep
 from decimal import Decimal
+from logger import DataLogger
 
 class BtClientApp():
     def __init__(self):
-        self.gui = appJar.gui("Bluetooth client demo")
+        self.gui = appJar.gui("Bluetooth client demo","800x300")
         self.client = BtClient()
         self.init_gui()
         self.connected = False
         self.gui.thread(self.update_status)
         self.gui.thread(self.update_data)
+        self.logger = DataLogger()
 
     def init_gui(self):
         self.gui.startLabelFrame("Connection", 0, 0)
+        self.gui.setStretch("row")
 
         self.gui.addLabel("Status", "Status:disconnected")
 
@@ -32,12 +35,18 @@ class BtClientApp():
         self.gui.stopLabelFrame()
 
         self.gui.startLabelFrame("Data", 0, 1)
-        self.gui.addLabel("buffer_size","Buffer size:"+str(len(self.client.buff)))
-        self.gui.addLabel("buffer",self.client.buff)
+        self.gui.addLabel("buffer_size", "Buffer size:"+str(len(self.client.buff)))
+        self.gui.addLabel("buffer", self.client.buff)
         self.gui.addLabel("packets", "Packets waiting:"+str(len(self.client.packets)))
         self.gui.addLabel("data_label", "Data:")
-        #self.gui.addMeter("data_meter")
-        self.gui.setStretch("row")
+        # self.gui.addMeter("data_meter")
+        # self.gui.startLabelFrame("Log File",4,1)
+        self.gui.addLabelFileEntry("log_file")
+        self.gui.setLabel("log_file", "Path")
+        self.gui.setEntry("log_file", "data.log")
+        # self.gui.addLabelEntry("log_name")
+        # self.gui.setLabel("log_name", "Name")
+        # self.gui.stopLabelFrame()
         self.gui.stopLabelFrame()
 
     def start_app(self):
@@ -49,6 +58,7 @@ class BtClientApp():
     def connection_button(self):
         if self.connected:
             self.client.stop()
+            self.logger.stop()
             self.gui.setButton("connection_button", "Connect")
             self.connected = False
             self.client = BtClient()
@@ -58,6 +68,7 @@ class BtClientApp():
             self.client.daemon = True
             self.client.uuid = self.gui.getEntry("UUID")
             self.client.start()
+            self.logger.start(self.gui.getEntry("log_file"))
             self.gui.setButton("connection_button", "Disconnect")
             self.connected = True
 
@@ -103,7 +114,8 @@ class BtClientApp():
             self.gui.setLabel("packets", "Packets waiting:" + str(len(self.client.packets)))
             if data is not None:
                 self.gui.setLabel("data_label", "Data:"+data)
-                #self.gui.setMeter("data_meter", round(Decimal(data)*100), data)
+                # self.gui.setMeter("data_meter", round(Decimal(data)*100), data)
+                self.logger.log(data)
             else:
                 sleep(0.1)
 
