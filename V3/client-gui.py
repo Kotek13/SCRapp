@@ -1,19 +1,22 @@
 import appJar
 from client import BtClient
 from threading import Thread
-from time import sleep
+from time import sleep, time
 from decimal import Decimal
 from logger import DataLogger
+from speedcounter import SpeedCounter
 
 class BtClientApp():
     def __init__(self):
-        self.gui = appJar.gui("Bluetooth client demo","800x300")
+        self.gui = appJar.gui("Bluetooth client demo","1300x300")
         self.client = BtClient()
         self.init_gui()
         self.connected = False
         self.gui.thread(self.update_status)
         self.gui.thread(self.update_data)
         self.logger = DataLogger()
+        self.BTspeed = SpeedCounter()
+        self.BTspeed.start()
 
     def init_gui(self):
         self.gui.startLabelFrame("Connection", 0, 0)
@@ -47,6 +50,9 @@ class BtClientApp():
         # self.gui.addLabelEntry("log_name")
         # self.gui.setLabel("log_name", "Name")
         # self.gui.stopLabelFrame()
+        self.gui.stopLabelFrame()
+        self.gui.startLabelFrame("plot",0,2)
+        self.gui.addPlot("p1", [0], [0])
         self.gui.stopLabelFrame()
 
     def start_app(self):
@@ -102,6 +108,13 @@ class BtClientApp():
                 self.gui.setLabel("Port", "Port:" + str(self.client.host_port))
             else:
                 self.gui.setLabel("Port", "Port:")
+            speed = self.BTspeed.get_speed()
+            # print(speed)
+            # speed = [(0,1),(1,2),(3,2)]
+            curr_time = time()
+            x = [round(i[0]-curr_time, 3) for i in speed]
+            y = [i[1] for i in speed]
+            self.gui.updatePlot("p1", x, y)
 
             sleep(0.2)
 
@@ -116,12 +129,13 @@ class BtClientApp():
                 self.gui.setLabel("data_label", "Data:"+data)
                 # self.gui.setMeter("data_meter", round(Decimal(data)*100), data)
                 self.logger.log(data)
+                self.BTspeed.add_data(len(data))
             else:
                 sleep(0.1)
 
 
 if __name__ == "__main__":
-    print "GUI started"
+    print("GUI started")
     app = BtClientApp()
     app.start_app()
-    print "App ended"
+    print("App ended")

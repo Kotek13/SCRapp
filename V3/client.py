@@ -40,7 +40,7 @@ class BtClient(Thread):
         self.host_address = first_match["host"]
         self.host_protocol = first_match["protocol"]
         self.state = self.State.connecting
-        print "connecting to \"%s\" on %s" % (self.host_name, self.host_address)
+        print("connecting to \"%s\" on %s" % (self.host_name, self.host_address))
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.sock.connect((self.host_address, self.host_port))
         self.state = self.State.connected
@@ -93,7 +93,7 @@ if __name__ == "__main__":
                 sleep(0.1)
             data = client.get_data()
             if data is not None:
-                print data
+                print(data)
     except KeyboardInterrupt:
         pass
     client.stop()

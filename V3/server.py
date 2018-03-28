@@ -31,20 +31,20 @@ class BtServer(Thread):
         self.server_sock.bind(("", self.port))
         self.state = self.State.listening
         self.server_sock.listen(1)
-        print "listening on port %d" % self.port
+        print("listening on port %d" % self.port)
         uuid = "5d6101f4-3c07-4c0e-b9c2-39e1df5690cc"
         bluetooth.advertise_service(self.server_sock, self.name, uuid)
         self.client_sock, address = self.server_sock.accept()
         #self.client_sock.settimeout(10)
         self.state = self.State.connected
-        print "Accepted connection from ", address
+        print("Accepted connection from ", address)
         while 0 < self.state < self.State.stopping:
             while len(self.buff) > 0:
                 success = self.send_data(self.buff[0])
                 if success:
                     self.buff.pop()
         self.state = self.State.stop
-        print "Connection lost"
+        print("Connection lost")
 
     def stop(self):
         self.state = self.State.stopping
@@ -84,18 +84,18 @@ if __name__ == "__main__":
     sleep(0.1)
     try:
         while True:
-            #print "Loop"
+            # print "Loop"
             if server.State.stop < server.state:
                 if not server.is_connected():
                     sleep(0.1)
                 else:
                     data = str(random())
-                    print server.state,data
+                    print(server.state,data)
                     completed = server.send_data(data)
                     if not completed:
                         server.stop()
             else:
-                print "Restarting"
+                print("Restarting")
                 del server
                 server = BtServer()
                 server.daemon = True
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     if server is not None:
         server.stop()
         server.join()
-    print "Server stopped"
+    print("Server stopped")
