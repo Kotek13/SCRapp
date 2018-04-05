@@ -14,8 +14,8 @@ class SpeedCounter:
 
 
     def worker(self):
-        curr_time = time()
-        prev_time = curr_time - self.averaging_time
+        prev_time = None
+        curr_time = time() - self.averaging_time
         while self.running:
             prev_time = curr_time
             while len(self.data_queue) > 0 and self.data_queue[0][0] < prev_time:
