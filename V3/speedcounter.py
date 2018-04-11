@@ -14,18 +14,20 @@ class SpeedCounter:
 
 
     def worker(self):
-        prev_time = None
         curr_time = time() - self.averaging_time
         while self.running:
             prev_time = curr_time
+            curr_time = time()
             while len(self.data_queue) > 0 and self.data_queue[0][0] < prev_time:
                 self.pop_data()
-            curr_time = time()
             average = self.data_sum/(curr_time-prev_time)
             self.average_speed.append((prev_time, average))
-            while self.buffor_size < len(self.average_speed):
+            while len(self.average_speed) > self.buffor_size:
                 self.average_speed.pop(0)
-            sleep(self.averaging_time)
+            timespan = (time()*1000-curr_time*1000)
+            print("timespan:",timespan,"ms")
+            #print(self.average_speed)
+            sleep(self.averaging_time-timespan)
 
     def pop_data(self):
         _time, length = self.data_queue.pop()
