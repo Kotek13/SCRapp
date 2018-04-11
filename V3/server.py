@@ -90,7 +90,7 @@ if __name__ == "__main__":
                     sleep(0.1)
                 else:
                     data = str(random())
-                    print(server.state,data)
+                    print(data)
                     completed = server.send_data(data)
                     if not completed:
                         server.stop()

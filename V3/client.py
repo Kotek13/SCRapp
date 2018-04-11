@@ -31,7 +31,11 @@ class BtClient(Thread):
         self.state = self.State.searching
         service_matches = []
         while len(service_matches) == 0:
-            service_matches = bluetooth.find_service(uuid=self.uuid)
+            try:
+                service_matches = bluetooth.find_service()
+                if 
+            except OSError:
+                print("OSError")
 
         # TODO selecting devices
         first_match = service_matches[0]
