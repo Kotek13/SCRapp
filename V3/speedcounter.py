@@ -30,7 +30,7 @@ class SpeedCounter:
             sleep(self.averaging_time-timespan)
 
     def pop_data(self):
-        _time, length = self.data_queue.pop()
+        _time, length = self.data_queue.pop(0)
         self.data_sum -= length
 
     def add_data(self, length):
