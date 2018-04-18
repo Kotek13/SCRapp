@@ -12,7 +12,6 @@ class SpeedCounter:
         self.running = False
         self.buffor_size = 60
 
-
     def worker(self):
         prev_time = None
         curr_time = time() - self.averaging_time
@@ -58,5 +57,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     counter.stop()
-
-

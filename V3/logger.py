@@ -1,5 +1,3 @@
-from os.path import join
-
 class DataLogger:
     def __init__(self):
         self.log_file = None

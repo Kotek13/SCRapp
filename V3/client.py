@@ -25,15 +25,13 @@ class BtClient(Thread):
         self.sock = None
         self.buff_max_size = 1024*10
         self.packets = []
-        self.tmp_packet = ""
 
     def run(self):
         self.state = self.State.searching
         service_matches = []
         while len(service_matches) == 0:
             try:
-                service_matches = bluetooth.find_service()
-                if 
+                service_matches = bluetooth.find_service(uuid=self.uuid)
             except OSError:
                 print("OSError")
 
@@ -76,6 +74,8 @@ class BtClient(Thread):
             else:
                 self.packets.append(self.buff[start+1:end-1])
                 self.buff = self.buff[end + 1:]
+            start = self.buff.find('[')
+            end = self.buff.find(']')
 
     def get_data(self):
         if len(self.packets) == 0:

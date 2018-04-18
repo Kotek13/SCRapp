@@ -1,22 +1,22 @@
 import appJar
 from client import BtClient
-from threading import Thread
 from time import sleep, time
-from decimal import Decimal
 from logger import DataLogger
 from speedcounter import SpeedCounter
 
-class BtClientApp():
+class BtClientApp:
     def __init__(self):
         self.gui = appJar.gui("Bluetooth client demo","1300x300")
-        self.client = BtClient()
-        self.init_gui()
-        self.connected = False
         self.gui.thread(self.update_status)
         self.gui.thread(self.update_data)
+
+        self.connected = False
+
+        self.client = BtClient()
         self.logger = DataLogger()
         self.BTspeed = SpeedCounter()
-        self.BTspeed.start()
+
+        self.init_gui()
 
     def init_gui(self):
         self.gui.startLabelFrame("Connection", 0, 0)
@@ -56,6 +56,7 @@ class BtClientApp():
         self.gui.stopLabelFrame()
 
     def start_app(self):
+        self.BTspeed.start()
         self.gui.go()
 
     def disconnect(self):
@@ -67,8 +68,8 @@ class BtClientApp():
             self.logger.stop()
             self.gui.setButton("connection_button", "Connect")
             self.connected = False
-            self.client = BtClient()
-            self.client.daemon = True
+            # self.client = BtClient()
+            # self.client.daemon = True
         else:
             self.client = BtClient()
             self.client.daemon = True

@@ -42,7 +42,7 @@ class BtServer(Thread):
             while len(self.buff) > 0:
                 success = self.send_data(self.buff[0])
                 if success:
-                    self.buff.pop()
+                    self.buff.pop(0)
         self.state = self.State.stop
         print("Connection lost")
 
@@ -65,7 +65,7 @@ class BtServer(Thread):
             return False
 
     def queue_data(self, data):
-        if len(self.buff) >= 50:
+        if not self.queue_full():
             return False
         self.buff.append(data)
         return True
