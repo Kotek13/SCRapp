@@ -6,17 +6,18 @@ from speedcounter import SpeedCounter
 
 class BtClientApp:
     def __init__(self):
-        self.gui = appJar.gui("Bluetooth client demo","1300x300")
-        self.gui.thread(self.update_status)
-        self.gui.thread(self.update_data)
-
-        self.connected = False
-
         self.client = BtClient()
         self.logger = DataLogger()
         self.BTspeed = SpeedCounter()
 
+        self.gui = appJar.gui("Bluetooth client demo","1300x300")
+        self.axes = None
         self.init_gui()
+
+        self.gui.thread(self.update_status)
+        self.gui.thread(self.update_data)
+
+        self.connected = False
 
     def init_gui(self):
         self.gui.startLabelFrame("Connection", 0, 0)
@@ -52,7 +53,11 @@ class BtClientApp:
         # self.gui.stopLabelFrame()
         self.gui.stopLabelFrame()
         self.gui.startLabelFrame("plot",0,2)
-        self.gui.addPlot("p1", [0], [0])
+        self.axes = self.gui.addPlot("p1", [0], [0])
+        self.axes.set_xlabel('s')
+        self.axes.set_ylabel('B/s')
+        # self.axes.xlim((-self.BTspeed.buffor_speed*self.BTspeed.averaging_time,0))
+        self.gui.refreshPlot("p1")
         self.gui.stopLabelFrame()
 
     def start_app(self):
@@ -115,7 +120,7 @@ class BtClientApp:
             curr_time = time()
             x = [round(i[0]-curr_time, 3) for i in speed]
             y = [i[1] for i in speed]
-            self.gui.updatePlot("p1", x, y)
+            self.gui.updatePlot("p1", x, y, keepLabels=True)
 
             sleep(0.2)
 
