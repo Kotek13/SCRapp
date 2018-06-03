@@ -47,7 +47,7 @@ class BtClient(Thread):
         self.sock.connect((self.host_address, self.host_port))
         self.state = self.State.connected
         try:
-            while 0 < self.state < self.State.stopping\
+            while self.State.connected <= self.state < self.State.stopping\
                     and len(self.buff) <= self.buff_max_size:
                 _data = self.sock.recv(1024)
                 self.buff += _data

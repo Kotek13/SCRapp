@@ -24,9 +24,9 @@ class SpeedCounter:
             while len(self.average_speed) > self.buffor_size:
                 self.average_speed.pop(0)
             timespan = (time()*1000-curr_time*1000)
-            print("timespan:",timespan,"ms")
+            #print("timespan:",timespan,"ms")
             #print(self.average_speed)
-            sleep(self.averaging_time-timespan)
+            sleep(max(self.averaging_time-timespan,0))
 
     def pop_data(self):
         _time, length = self.data_queue.pop(0)

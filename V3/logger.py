@@ -3,8 +3,11 @@ class DataLogger:
         self.log_file = None
 
     def log(self, data):
-        if file is not None:
+        if self.log_file is not None and not self.log_file.closed:
             self.log_file.write("\n" + data)
+            return True
+        else:
+            return False
 
     def start(self, file = "data.log"):
         self.log_file = open(file, "a")
